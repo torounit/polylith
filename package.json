@@ -1,13 +1,12 @@
 {
-  "name": "webcomponents-theme",
+  "name": "polylith",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "provision": "docker run --name webcomponents-theme -u www-data -v $(pwd):/var/www/wordpress/wp-content/themes/$(basename $(pwd) )  --shm-size 2048m -p 80:80 -d torounit/wp-theme-test-env",
-    "start": "docker webcomponents-theme"
+    "provision": "docker run --name polylith -u www-data -v $(pwd):/var/www/wordpress/wp-content/themes/$(basename $(pwd) )  --shm-size 2048m -p 80:80 -d torounit/wp-theme-test-env",
+    "start": "docker start polylith"
   },
-  "license": "GPL",
+  "license": "GPL-2.0+",
   "dependencies": {
     "lit-html": "^0.9.0"
   },

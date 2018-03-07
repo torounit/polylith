@@ -2,25 +2,25 @@
 /**
  * Components functions and definitions.
  *
- * @package wctheme
+ * @package polylith
  */
 
-	if ( ! function_exists( 'wctheme_setup' ) ) :
+	if ( ! function_exists( 'polylith_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
 	 */
-	function wctheme_setup() {
+	function polylith_setup() {
 
-		load_theme_textdomain( 'wctheme', get_template_directory() . '/languages' );
+		load_theme_textdomain( 'polylith', get_template_directory() . '/languages' );
 		add_theme_support( 'automatic-feed-links' );
 		add_theme_support( 'title-tag' );
 		add_theme_support( 'post-thumbnails' );
 		add_editor_style( get_stylesheet_uri() );
 
-		add_image_size( 'wctheme-featured-image', 1920, 960, true );
+		add_image_size( 'polylith-featured-image', 1920, 960, true );
 
 		register_nav_menus( array(
-			'primary' => esc_html__( 'Primary Menu', 'wctheme' ),
+			'primary' => esc_html__( 'Primary Menu', 'polylith' ),
 		) );
 
 		/**
@@ -45,26 +45,23 @@
 		add_theme_support( 'customize-selective-refresh-widgets' );
 	}
 endif;
-add_action( 'after_setup_theme', 'wctheme_setup' );
+add_action( 'after_setup_theme', 'polylith_setup' );
 
 
 
 /**
  * Enqueue scripts and styles.
  */
-function wctheme_scripts() {
+function polylith_scripts() {
 	$theme   = wp_get_theme( get_template() );
 	$version = $theme->get( 'Version' );
 	if ( is_child_theme() ) {
 		wp_enqueue_style( get_template() . '-style', get_template_directory_uri() . '/style.css', array( 'dashicons' ), $version );
 	}
 	wp_enqueue_style( get_stylesheet() . '-style', get_stylesheet_uri(), array( 'dashicons' ), $version );
-	wp_enqueue_script( 'wctheme-script', get_template_directory_uri() . '/bundle.js', array(
-		'jquery',
-		'underscore',
-	), $version, true );
+	wp_enqueue_script( 'wp-api' );
 }
 
-add_action( 'wp_enqueue_scripts', 'wctheme_scripts' );
+add_action( 'wp_enqueue_scripts', 'polylith_scripts' );
 
 
