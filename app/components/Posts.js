@@ -1,4 +1,5 @@
 import {html, render} from 'https://unpkg.com/lit-html@0.9.0/lib/lit-extended'
+import {repeat} from 'https://unpkg.com/lit-html@0.9.0/lib/repeat.js'
 
 export default class extends HTMLElement {
 
@@ -14,18 +15,23 @@ export default class extends HTMLElement {
 	}
 
 	async render () {
+		const root = this.shadowRoot || this.attachShadow( { mode: 'open' } )
 		const posts = await (new wp.api.collections.Posts()).fetch()
-		let contents = html( posts.map( post => this.html( post ) ) );
-		render( contents, this.shadowRoot || this.attachShadow( { mode: 'open' } ) )
+		render( this.html( posts ), root )
 	}
 
-	html ( { title, content, link } ) {
-		return `
-		<article>
-			<h2><a href="${link}">${title.rendered}</a></h2>
-			<div>${content.rendered}</div>
-		</article>
-		`
+	html ( posts ) {
+		return html`
+		  <ul>
+			${ repeat( posts, ( i ) => i.id, ( { title, content, link, id } ) => html`
+			  <li><a href="${link}" on-click="${(event) => this.onClick(event)}">${title.rendered}</a></li>` )}
+		  </ul>
+		`;
+	}
+
+	onClick ( event ) {
+		//event.preventDefault();
+		//window.history.pushState( {}, null, event.currentTarget.getAttribute( 'href' ) );
 	}
 }
 

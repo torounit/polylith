@@ -6,3 +6,9 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: wctheme
 
 */
+
+:root {
+	background-color: #eee;
+	color: #333;
+	font-size: 20px;
+}

@@ -3,19 +3,21 @@ import {html, render} from 'https://unpkg.com/lit-html@0.9.0/lib/lit-extended'
 export default class extends HTMLElement {
 
 	static get observedAttributes () {
-		return [ 'name' ]
+		return [ 'name','url' ]
 	}
 
 	constructor () {
 		super()
-		this.setName()
+		this.setName();
+		this.render();
 	}
 
 	/**
 	 * render
 	 */
 	render() {
-		render((this.html()), this.shadowRoot || this.attachShadow({mode: 'open'}))
+		const root = this.shadowRoot || this.attachShadow({mode: 'open'});
+		root.innerHTML = this.html();
 	}
 
 	/**
@@ -26,14 +28,19 @@ export default class extends HTMLElement {
 		let response = await fetch( window.wpApiSettings.root );
 		let data = await response.json()
 		this.setAttribute('name', data.name)
+		this.setAttribute('url', data.url)
 	}
 
 	/**
 	 *
-	 * @returns TemplateResult
+	 * @returns String
 	 */
 	html () {
-		return html`<span>${this.getAttribute('name')}</span>`
+		let name = this.getAttribute('name');
+		if( name ) {
+			return `<a href="${this.getAttribute('url')}">${this.getAttribute('name')}</a>`
+		}
+		return ``
 	}
 
 	// Respond to attribute changes.

@@ -5,7 +5,7 @@
  * @package polylith
  */
 
-	if ( ! function_exists( 'polylith_setup' ) ) :
+if ( ! function_exists( 'polylith_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
 	 */
@@ -41,12 +41,9 @@
 			'caption',
 		) );
 
-		// Indicate widget sidebars can use selective refresh in the Customizer.
-		add_theme_support( 'customize-selective-refresh-widgets' );
 	}
 endif;
 add_action( 'after_setup_theme', 'polylith_setup' );
-
 
 
 /**
@@ -56,12 +53,84 @@ function polylith_scripts() {
 	$theme   = wp_get_theme( get_template() );
 	$version = $theme->get( 'Version' );
 	if ( is_child_theme() ) {
-		wp_enqueue_style( get_template() . '-style', get_template_directory_uri() . '/style.css', array( 'dashicons' ), $version );
+		wp_enqueue_style( get_template() . '-style', get_template_directory_uri() . '/style.css', array(  ), $version );
 	}
-	wp_enqueue_style( get_stylesheet() . '-style', get_stylesheet_uri(), array( 'dashicons' ), $version );
+	wp_enqueue_style( get_stylesheet() . '-style', get_stylesheet_uri(), array(  ), $version );
 	wp_enqueue_script( 'wp-api' );
+	$data = [
+		'permastructs' => polylith_permastructs(),
+		'themeFileUri' => get_theme_file_uri()
+	];
+	$js = sprintf( 'window.polylith = %s;', wp_json_encode( $data ) );
+	wp_script_add_data( 'wp-api', 'data', $js );
+
 }
 
 add_action( 'wp_enqueue_scripts', 'polylith_scripts' );
 
+/**
+ * @return array
+ */
+function polylith_permastructs() {
+	/**
+	 * @var WP_Rewrite $wp_rewrite
+	 */
+	global $wp_rewrite;
 
+	$extra_permastructs = array_map( function ( $permastruct ) {
+		return $permastruct['struct'];
+	}, $wp_rewrite->extra_permastructs );
+
+	if ( $wp_rewrite->use_verbose_page_rules ) {
+		$permastructs = [
+			'category' => $wp_rewrite->get_category_permastruct(),
+			'tag'      => $wp_rewrite->get_tag_permastruct(),
+			'search'   => $wp_rewrite->get_search_permastruct(),
+			'author'   => $wp_rewrite->get_author_permastruct(),
+			'date'     => $wp_rewrite->get_date_permastruct(),
+			'month'    => $wp_rewrite->get_month_permastruct(),
+			'year'     => $wp_rewrite->get_year_permastruct(),
+			'post'     => $wp_rewrite->permalink_structure,
+			'page'     => $wp_rewrite->get_page_permastruct(),
+		];
+	} else {
+		$permastructs = [
+			'category' => $wp_rewrite->get_category_permastruct(),
+			'tag'      => $wp_rewrite->get_tag_permastruct(),
+			'search'   => $wp_rewrite->get_search_permastruct(),
+			'author'   => $wp_rewrite->get_author_permastruct(),
+			'date'     => $wp_rewrite->get_date_permastruct(),
+			'month'    => $wp_rewrite->get_month_permastruct(),
+			'year'     => $wp_rewrite->get_year_permastruct(),
+			'page'     => $wp_rewrite->get_page_permastruct(),
+			'post'     => $wp_rewrite->permalink_structure,
+
+		];
+	}
+
+	$permastructs = array_merge( $extra_permastructs, $permastructs );
+
+	return array_map( function ( $key, $value ) {
+		$struct = trim( preg_replace( '/%([^\/]+)%/', ':$1', $value ), '/\\' );
+		$struct = str_replace(
+			[
+				':year',
+				':monthnum',
+				':day',
+				':post_id'
+			],
+			[
+				':year(\\d{4})',
+				':monthnum(\\d{1,2})',
+				':day(\\d{1,2})',
+				':post_id(\\d+)'
+			],
+			$struct
+		);
+
+		return [
+			'name'   => $key,
+			'struct' => '/' . $struct.'/*'
+		];
+	}, array_keys( $permastructs ), array_values( $permastructs ) );
+}
