@@ -8,7 +8,4 @@ customElements.define( 'polylith-posts', Posts )
 customElements.define( 'polylith-post', Post )
 customElements.define( 'polylith-contents', Contents )
 
-navigator.serviceWorker.register( window.polylith.themeFileUri + '/service-worker.php', {scope: '/'});
-
-
 

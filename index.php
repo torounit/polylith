@@ -23,6 +23,5 @@
 
 
 <?php wp_footer(); ?>
-<script type="module" src="<?php echo get_theme_file_uri( 'module.js');?>"></script>
 </body>
 </html>

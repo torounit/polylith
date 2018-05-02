@@ -5,44 +5,43 @@
  * @package polylith
  */
 
-if ( ! function_exists( 'polylith_setup' ) ) :
+/**
+ * Sets up theme defaults and registers support for various WordPress features.
+ */
+function polylith_setup() {
+
+	load_theme_textdomain( 'polylith', get_template_directory() . '/languages' );
+	add_theme_support( 'automatic-feed-links' );
+	add_theme_support( 'title-tag' );
+	add_theme_support( 'post-thumbnails' );
+	add_editor_style( get_stylesheet_uri() );
+
+	add_image_size( 'polylith-featured-image', 1920, 960, true );
+
+	register_nav_menus( array(
+		'primary' => esc_html__( 'Primary Menu', 'polylith' ),
+	) );
+
 	/**
-	 * Sets up theme defaults and registers support for various WordPress features.
+	 * Add support for core custom logo.
 	 */
-	function polylith_setup() {
+	add_theme_support( 'custom-logo', [
+		'height'      => 150,
+		'width'       => 150,
+		'flex-width'  => true,
+		'flex-height' => true,
+	] );
 
-		load_theme_textdomain( 'polylith', get_template_directory() . '/languages' );
-		add_theme_support( 'automatic-feed-links' );
-		add_theme_support( 'title-tag' );
-		add_theme_support( 'post-thumbnails' );
-		add_editor_style( get_stylesheet_uri() );
+	add_theme_support( 'html5', [
+		'search-form',
+		'comment-form',
+		'comment-list',
+		'gallery',
+		'caption',
+	] );
 
-		add_image_size( 'polylith-featured-image', 1920, 960, true );
+}
 
-		register_nav_menus( array(
-			'primary' => esc_html__( 'Primary Menu', 'polylith' ),
-		) );
-
-		/**
-		 * Add support for core custom logo.
-		 */
-		add_theme_support( 'custom-logo', array(
-			'height'      => 150,
-			'width'       => 150,
-			'flex-width'  => true,
-			'flex-height' => true,
-		) );
-
-		add_theme_support( 'html5', array(
-			'search-form',
-			'comment-form',
-			'comment-list',
-			'gallery',
-			'caption',
-		) );
-
-	}
-endif;
 add_action( 'after_setup_theme', 'polylith_setup' );
 
 
@@ -52,23 +51,42 @@ add_action( 'after_setup_theme', 'polylith_setup' );
 function polylith_scripts() {
 	$theme   = wp_get_theme( get_template() );
 	$version = $theme->get( 'Version' );
-	if ( is_child_theme() ) {
-		wp_enqueue_style( get_template() . '-style', get_template_directory_uri() . '/style.css', array(  ), $version );
-	}
-	wp_enqueue_style( get_stylesheet() . '-style', get_stylesheet_uri(), array(  ), $version );
+	wp_enqueue_style( get_stylesheet() . '-style', get_stylesheet_uri(), [], $version );
 	wp_enqueue_script( 'wp-api' );
+	wp_enqueue_script( 'polylith-module', get_theme_file_uri( 'module.js' ), [], $version, true );
 	$data = [
 		'permastructs' => polylith_permastructs(),
 		'themeFileUri' => get_theme_file_uri()
 	];
-	$js = sprintf( 'window.polylith = %s;', wp_json_encode( $data ) );
+	$js   = sprintf( 'window.polylith = %s;', wp_json_encode( $data ) );
 	wp_script_add_data( 'wp-api', 'data', $js );
-
 }
 
 add_action( 'wp_enqueue_scripts', 'polylith_scripts' );
 
 /**
+ * Convert script tag to module.
+ *
+ * @param string $tag The `<script>` tag for the enqueued script.
+ * @param string $handle The script's registered handle.
+ * @param string $src The script's source URL.
+ *
+ * @return string
+ */
+function polylith_script_loader_tag( $tag, $handle, $src ) {
+	if ( 'polylith-module' === $handle ) {
+		return $tag = sprintf( '<script type="module" src="%s"></script>', $src );
+	}
+
+	return $tag;
+}
+
+add_filter( 'script_loader_tag', 'polylith_script_loader_tag', 10, 3 );
+
+
+/**
+ * Permastruct Lists.
+ *
  * @return array
  */
 function polylith_permastructs() {
@@ -130,7 +148,7 @@ function polylith_permastructs() {
 
 		return [
 			'name'   => $key,
-			'struct' => '/' . $struct.'/*'
+			'struct' => '/' . $struct . '/*'
 		];
 	}, array_keys( $permastructs ), array_values( $permastructs ) );
 }
